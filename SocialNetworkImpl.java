@@ -6,7 +6,13 @@ public class SocialNetworkImpl implements SocialNetwork {
     private static final String INSERT_USER_QUERY = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
     private static final String SELECT_USER_QUERY = "SELECT * FROM users WHERE email = ? AND password = ?";
     private static final String INSERT_FRIENDSHIP_QUERY = "INSERT INTO friendship (user_id, friend_id) VALUES (?, ?)";
-    private static final String SELECT_FRIENDS_QUERY = "SELECT u.* FROM users u INNER JOIN friendship f ON u.id = f.friend_id WHERE f.user_id = ?";
+    private static final String SELECT_FRIENDS_QUERY = "SELECT u.* FROM users u " +
+            "INNER JOIN friendship f ON u.id = f.friend_id " +
+            "WHERE f.user_id = ? " +
+            "UNION " +
+            "SELECT u.* FROM users u " +
+            "INNER JOIN friendship f ON u.id = f.user_id " +
+            "WHERE f.friend_id = ?";
     private static final String DELETE_FRIENDSHIP_QUERY = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
     private static final String INSERT_MESSAGE_QUERY = "INSERT INTO messages (sender_id, receiver_id, message_text) VALUES (?, ?, ?)";
     private static final String DELETE_MESSAGE_QUERY = "DELETE FROM messages WHERE receiver_id = ? AND id = ?";
@@ -88,10 +94,6 @@ public class SocialNetworkImpl implements SocialNetwork {
     }
 
     private boolean saoAmigos(int idUsuario, int idAmigo) {
-        // Implemente a lógica para verificar se os usuários são amigos.
-        // Por exemplo, você pode fazer uma consulta na tabela de amizade para verificar se existe uma entrada correspondente.
-        // Retorne true se já são amigos, ou false caso contrário.
-        // Substitua o código abaixo pelo seu código de verificação.
 
         try (PreparedStatement statement = connection.prepareStatement(CHECK_FRIENDSHIP_QUERY)) {
             statement.setInt(1, idUsuario);
@@ -114,6 +116,7 @@ public class SocialNetworkImpl implements SocialNetwork {
         if (user != null) {
             try (PreparedStatement statement = connection.prepareStatement(SELECT_FRIENDS_QUERY)) {
                 statement.setInt(1, user.getId());
+                statement.setInt(2, user.getId());
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next()) {
                         int amigoId = resultSet.getInt("id");
