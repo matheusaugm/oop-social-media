@@ -9,7 +9,7 @@ public class SocialNetworkImpl implements SocialNetwork {
     private static final String SELECT_FRIENDS_QUERY = "SELECT u.* FROM users u INNER JOIN friendship f ON u.id = f.friend_id WHERE f.user_id = ?";
     private static final String DELETE_FRIENDSHIP_QUERY = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
     private static final String INSERT_MESSAGE_QUERY = "INSERT INTO messages (sender_id, receiver_id, message_text) VALUES (?, ?, ?)";
-    private static final String DELETE_MESSAGE_QUERY = "DELETE FROM messages WHERE receiver_id = ? AND id = ? VALUES (?, ?)";
+    private static final String DELETE_MESSAGE_QUERY = "DELETE FROM messages WHERE receiver_id = ? AND id = ?";
     private static final String SELECT_WHO_SENT_MESSAGE_QUERY = "SELECT u.name from users u INNER JOIN messages m ON u.id =  m.sender_id WHERE m.sender_id = ? AND m.receiver_id = ?";
     private static final String SELECT_ALL_MESSAGES = "SELECT m.id as id_mensagem,m.message_text, m.receiver_id, m.sender_id, u.name as friend_name, u.id FROM messages m INNER JOIN users u ON u.id = m.receiver_id WHERE m.receiver_id = ?";
 
@@ -205,7 +205,7 @@ public class SocialNetworkImpl implements SocialNetwork {
             try (PreparedStatement statement = connection.prepareStatement(DELETE_MESSAGE_QUERY)) {
                 statement.setInt(1, user.getId());
                 statement.setInt(2, idMensagem);
-                int affectedRows = statement.executeQuery();
+                int affectedRows = statement.executeUpdate();
                 return affectedRows > 0;
             } catch (SQLException e) {
                 System.out.println("Erro ao excluir mensagem: " + e.getMessage());
